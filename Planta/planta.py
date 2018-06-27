@@ -40,8 +40,8 @@ Notifier.warningHandler = Common.warning
 Notifier.concurrencyErrorHandler = Common.concurrencyError
 
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PySide.QtGui import *
+from PySide.QtCore import *
 import sys
 from MainWindow import *
 

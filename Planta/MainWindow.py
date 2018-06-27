@@ -25,9 +25,9 @@
 #
 ##############################################################################
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-from PyQt4.uic import *
+from PySide.QtGui import *
+from PySide.QtCore import *
+from PySide.uic import *
 from NanScan.Template import *
 from NanScan.Ocr import *
 from NanScan.Recognizer import *
@@ -42,664 +42,664 @@ from Koo import Rpc
 
 class ToolWidget(QWidget):
 
-	def __init__(self, parent=None):
-		QWidget.__init__(self, parent)
-		loadUi( 'toolwidget.ui', self )
+        def __init__(self, parent=None):
+                QWidget.__init__(self, parent)
+                loadUi( 'toolwidget.ui', self )
 
-		for x in TemplateBox.recognizers:
-			self.uiRecognizer.addItem( x )
+                for x in TemplateBox.recognizers:
+                        self.uiRecognizer.addItem( x )
 
-		for x in TemplateBox.types:
-			self.uiType.addItem( x )
+                for x in TemplateBox.types:
+                        self.uiType.addItem( x )
 
-		for x in TemplateBox.filters:
-			self.uiFilter.addItem( x )
+                for x in TemplateBox.filters:
+                        self.uiFilter.addItem( x )
 
-		self._box = None
-		self.load()
-		self.connect( self.uiRecognizer, SIGNAL('activated(QString)'), self.recognizerChanged )
+                self._box = None
+                self.load()
+                self.connect( self.uiRecognizer, SIGNAL('activated(QString)'), self.recognizerChanged )
 
-	def recognizerChanged(self, recognizer):
-		self.emit(SIGNAL('recognizerChanged(QString)'), recognizer)
+        def recognizerChanged(self, recognizer):
+                self.emit(SIGNAL('recognizerChanged(QString)'), recognizer)
 
-	def setText(self, text):
-		self.uiText.setText( text )
+        def setText(self, text):
+                self.uiText.setText( text )
 
-	def setBox(self, box):
-		self._box = box
-		self.load()
+        def setBox(self, box):
+                self._box = box
+                self.load()
 
-	def getBox(self):
-		return self._box
-	box=property(getBox,setBox)
+        def getBox(self):
+                return self._box
+        box=property(getBox,setBox)
 
-	def store(self):
-		if not self._box:
-			return
-		self._box.rect = QRectF( self.uiX.value(), self.uiY.value(), self.uiWidth.value(), self.uiHeight.value() )
-		self._box.recognizer = unicode( self.uiRecognizer.currentText() )
-		self._box.type = unicode( self.uiType.currentText() )
-		self._box.filter = unicode( self.uiFilter.currentText() )
-		self._box.name = unicode( self.uiName.text() )
-		self._box.text = unicode( self.uiText.text() )
+        def store(self):
+                if not self._box:
+                        return
+                self._box.rect = QRectF( self.uiX.value(), self.uiY.value(), self.uiWidth.value(), self.uiHeight.value() )
+                self._box.recognizer = unicode( self.uiRecognizer.currentText() )
+                self._box.type = unicode( self.uiType.currentText() )
+                self._box.filter = unicode( self.uiFilter.currentText() )
+                self._box.name = unicode( self.uiName.text() )
+                self._box.text = unicode( self.uiText.text() )
 
-	def enable(self, value):
-		if not value:
-			self.uiX.setValue( -1 )
-			self.uiY.setValue( -1 )
-			self.uiWidth.setValue( -1 )
-			self.uiHeight.setValue( -1 )
-		self.uiName.clear()
-		self.uiText.clear()
-		self.uiRecognizer.setEnabled( value )
-		self.uiName.setEnabled( value )
-		self.uiText.setEnabled( value )
-		self.uiType.setEnabled( value )
-		self.uiFilter.setEnabled( value )
+        def enable(self, value):
+                if not value:
+                        self.uiX.setValue( -1 )
+                        self.uiY.setValue( -1 )
+                        self.uiWidth.setValue( -1 )
+                        self.uiHeight.setValue( -1 )
+                self.uiName.clear()
+                self.uiText.clear()
+                self.uiRecognizer.setEnabled( value )
+                self.uiName.setEnabled( value )
+                self.uiText.setEnabled( value )
+                self.uiType.setEnabled( value )
+                self.uiFilter.setEnabled( value )
 
-	def load(self):
-		if self._box:
-			self.enable( True )
-			self.uiX.setValue( self._box.rect.x() )
-			self.uiY.setValue( self._box.rect.y() )
-			self.uiWidth.setValue( self._box.rect.width() )
-			self.uiHeight.setValue( self._box.rect.height() )
-			self.uiRecognizer.setCurrentIndex( self.uiRecognizer.findText( self._box.recognizer ) )
-			self.uiType.setCurrentIndex( self.uiType.findText( self._box.type ) )
-			self.uiFilter.setCurrentIndex( self.uiFilter.findText( self._box.filter ) )
-			self.uiText.setText( self._box.text )
-			self.uiName.setText( self._box.name )
-		else:
-			self.enable( False )
+        def load(self):
+                if self._box:
+                        self.enable( True )
+                        self.uiX.setValue( self._box.rect.x() )
+                        self.uiY.setValue( self._box.rect.y() )
+                        self.uiWidth.setValue( self._box.rect.width() )
+                        self.uiHeight.setValue( self._box.rect.height() )
+                        self.uiRecognizer.setCurrentIndex( self.uiRecognizer.findText( self._box.recognizer ) )
+                        self.uiType.setCurrentIndex( self.uiType.findText( self._box.type ) )
+                        self.uiFilter.setCurrentIndex( self.uiFilter.findText( self._box.filter ) )
+                        self.uiText.setText( self._box.text )
+                        self.uiName.setText( self._box.name )
+                else:
+                        self.enable( False )
 
 
 class TemplateBoxItem(QGraphicsRectItem):
-	def __init__(self, rect, featureRect = None):
-		QGraphicsRectItem.__init__(self, rect)
-		self.templateBox = None
-		if featureRect:
-			self.feature = QGraphicsRectItem(featureRect, self)
-			self.feature.setZValue( -1 )
+        def __init__(self, rect, featureRect = None):
+                QGraphicsRectItem.__init__(self, rect)
+                self.templateBox = None
+                if featureRect:
+                        self.feature = QGraphicsRectItem(featureRect, self)
+                        self.feature.setZValue( -1 )
 
 class DocumentScene(QGraphicsScene):
 
-	CreationMode = 1
-	SelectionMode = 2
+        CreationMode = 1
+        SelectionMode = 2
 
-	MovingState = 1
-	CreationState = 2
+        MovingState = 1
+        CreationState = 2
 
-	def __init__(self, parent=None):
-		QGraphicsScene.__init__(self,parent)
-		self._imageBoxesVisible = True
-		self._templateBoxesVisible = True
-		self._featureBoxesVisible = True
-		self._binarizedVisible = False
-		self._mode = self.CreationMode
-		self._selection = None
-		self._activeItem = None
-		self._imageBoxes = None
-		self._templateBoxes = []
-		self._activeItemPen = QPen( QBrush( QColor('green') ), 1 )
-		self._activeItemBrush = QBrush( QColor( 0, 255, 0, 50 ) )
-		self._boxItemPen = QPen( QBrush( QColor( 'red' ) ), 1 )
-		self._boxItemBrush = QBrush( QColor( 255, 0, 0, 50 ) )
-		self._selectionPen = QPen( QBrush( QColor( 'blue' ) ), 1 )
-		self._selectionBrush = QBrush( QColor( 0, 0, 255, 50 ) )
-		self._circleItemPen = QPen( QBrush( QColor( 'yellow' ) ), 1 )
-		self._circleItemBrush = QBrush( QColor( 255, 255, 0, 50 ) )
-		self.state = None
-		self.recognizer = None
-		self._image = None
-		self._oneBitImage = None
-		self._template = None
-		self.dotsPerMillimeterX = None
-		self.dotsPerMillimeterY = None
+        def __init__(self, parent=None):
+                QGraphicsScene.__init__(self,parent)
+                self._imageBoxesVisible = True
+                self._templateBoxesVisible = True
+                self._featureBoxesVisible = True
+                self._binarizedVisible = False
+                self._mode = self.CreationMode
+                self._selection = None
+                self._activeItem = None
+                self._imageBoxes = None
+                self._templateBoxes = []
+                self._activeItemPen = QPen( QBrush( QColor('green') ), 1 )
+                self._activeItemBrush = QBrush( QColor( 0, 255, 0, 50 ) )
+                self._boxItemPen = QPen( QBrush( QColor( 'red' ) ), 1 )
+                self._boxItemBrush = QBrush( QColor( 255, 0, 0, 50 ) )
+                self._selectionPen = QPen( QBrush( QColor( 'blue' ) ), 1 )
+                self._selectionBrush = QBrush( QColor( 0, 0, 255, 50 ) )
+                self._circleItemPen = QPen( QBrush( QColor( 'yellow' ) ), 1 )
+                self._circleItemBrush = QBrush( QColor( 255, 255, 0, 50 ) )
+                self.state = None
+                self.recognizer = None
+                self._image = None
+                self._oneBitImage = None
+                self._template = None
+                self.dotsPerMillimeterX = None
+                self.dotsPerMillimeterY = None
 
-	def setDocument(self, recognizer):
-		self.clearImage()
+        def setDocument(self, recognizer):
+                self.clearImage()
 
-		self.recognizer = recognizer
+                self.recognizer = recognizer
 
-		image = self.recognizer.image
-		self.dotsPerMillimeterX = float( image.dotsPerMeterX() ) / 1000.0
-		self.dotsPerMillimeterY = float( image.dotsPerMeterY() ) / 1000.0
-		print "DOTS PER MILLIMETER %s, %s" % (self.dotsPerMillimeterX, self.dotsPerMillimeterY)
+                image = self.recognizer.image
+                self.dotsPerMillimeterX = float( image.dotsPerMeterX() ) / 1000.0
+                self.dotsPerMillimeterY = float( image.dotsPerMeterY() ) / 1000.0
+                print "DOTS PER MILLIMETER %s, %s" % (self.dotsPerMillimeterX, self.dotsPerMillimeterY)
 
-		self._image = self.addPixmap( QPixmap.fromImage( image ) )
-		self._imageBoxes = self.createItemGroup( [] )
-		for i in self.recognizer.boxes('text'):
-			#rect = QGraphicsRectItem( i.box, self._imageBoxes )
-			rect = QGraphicsRectItem( self.mapRectFromRecognizer( i.box ), self._imageBoxes )
-			rect.setPen( self._boxItemPen )
-			rect.setBrush( self._boxItemBrush )
-			self._imageBoxes.addToGroup( rect )
+                self._image = self.addPixmap( QPixmap.fromImage( image ) )
+                self._imageBoxes = self.createItemGroup( [] )
+                for i in self.recognizer.boxes('text'):
+                        #rect = QGraphicsRectItem( i.box, self._imageBoxes )
+                        rect = QGraphicsRectItem( self.mapRectFromRecognizer( i.box ), self._imageBoxes )
+                        rect.setPen( self._boxItemPen )
+                        rect.setBrush( self._boxItemBrush )
+                        self._imageBoxes.addToGroup( rect )
 
-		for i in self.recognizer.boxes('barcode'):
-			#circle = QGraphicsEllipseItem( i.position.x(), i.position.y(), 40, 40 )
-			rect = QRectF( i.position.x() - 5, i.position.y() - 5, 10, 10 )
-			circle = QGraphicsEllipseItem( self.mapRectFromRecognizer( rect ) )
-			circle.setPen( self._circleItemPen )
-			circle.setBrush( self._circleItemBrush )
-			self._imageBoxes.addToGroup( circle )
+                for i in self.recognizer.boxes('barcode'):
+                        #circle = QGraphicsEllipseItem( i.position.x(), i.position.y(), 40, 40 )
+                        rect = QRectF( i.position.x() - 5, i.position.y() - 5, 10, 10 )
+                        circle = QGraphicsEllipseItem( self.mapRectFromRecognizer( rect ) )
+                        circle.setPen( self._circleItemPen )
+                        circle.setBrush( self._circleItemBrush )
+                        self._imageBoxes.addToGroup( circle )
 
-		for i in self.recognizer.boxes('dataMatrix'):
-			rect = QGraphicsRectItem( self.mapRectFromRecognizer( i.box ), self._imageBoxes )
-			rect.setPen( self._boxItemPen )
-			rect.setBrush( self._boxItemBrush )
-			self._imageBoxes.addToGroup( rect )
+                for i in self.recognizer.boxes('dataMatrix'):
+                        rect = QGraphicsRectItem( self.mapRectFromRecognizer( i.box ), self._imageBoxes )
+                        rect.setPen( self._boxItemPen )
+                        rect.setBrush( self._boxItemBrush )
+                        self._imageBoxes.addToGroup( rect )
 
-		self.setImageBoxesVisible( self._imageBoxesVisible )
-		self._imageBoxes.setZValue( 2 )
+                self.setImageBoxesVisible( self._imageBoxesVisible )
+                self._imageBoxes.setZValue( 2 )
 
-		self._oneBitImage = self.addPixmap( QPixmap.fromImage( self.recognizer.image ) )
-		self._oneBitImage.setZValue( 1 )
-		self.setBinarizedVisible( self._binarizedVisible )
+                self._oneBitImage = self.addPixmap( QPixmap.fromImage( self.recognizer.image ) )
+                self._oneBitImage.setZValue( 1 )
+                self.setBinarizedVisible( self._binarizedVisible )
 
-		self.setTemplateBoxesVisible( self._templateBoxesVisible )
+                self.setTemplateBoxesVisible( self._templateBoxesVisible )
 
-	def mapRectFromRecognizer(self, rect):
-		# When there's no image loaded yet, return the same rect
-		if not self.dotsPerMillimeterX:
-			return rect
-		box = QRectF()
-		box.setX( rect.x() * self.dotsPerMillimeterX )
-		box.setY( rect.y() * self.dotsPerMillimeterY )
-		box.setWidth( rect.width() * self.dotsPerMillimeterX )
-		box.setHeight( rect.height() * self.dotsPerMillimeterY )
-		return box
+        def mapRectFromRecognizer(self, rect):
+                # When there's no image loaded yet, return the same rect
+                if not self.dotsPerMillimeterX:
+                        return rect
+                box = QRectF()
+                box.setX( rect.x() * self.dotsPerMillimeterX )
+                box.setY( rect.y() * self.dotsPerMillimeterY )
+                box.setWidth( rect.width() * self.dotsPerMillimeterX )
+                box.setHeight( rect.height() * self.dotsPerMillimeterY )
+                return box
 
-	def mapRectToRecognizer(self, rect):
-		# When there's no image loaded yet, return the same rect
-		if not self.dotsPerMillimeterX:
-			return rect
-		box = QRectF()
-		box.setX( rect.x() / self.dotsPerMillimeterX )
-		box.setY( rect.y() / self.dotsPerMillimeterY )
-		box.setWidth( rect.width() / self.dotsPerMillimeterX )
-		box.setHeight( rect.height() / self.dotsPerMillimeterY )
-		return box
+        def mapRectToRecognizer(self, rect):
+                # When there's no image loaded yet, return the same rect
+                if not self.dotsPerMillimeterX:
+                        return rect
+                box = QRectF()
+                box.setX( rect.x() / self.dotsPerMillimeterX )
+                box.setY( rect.y() / self.dotsPerMillimeterY )
+                box.setWidth( rect.width() / self.dotsPerMillimeterX )
+                box.setHeight( rect.height() / self.dotsPerMillimeterY )
+                return box
 
-	def mapPointFromRecognizer(self, point):
-		# When there's no image loaded yet, return the same point
-		if not self.dotsPerMillimeterX:
-			return point
-		d = QPointF()
-		d.setX( point.x() * self.dotsPerMillimeterX )
-		d.setY( point.y() * self.dotsPerMillimeterY )
-		return d
+        def mapPointFromRecognizer(self, point):
+                # When there's no image loaded yet, return the same point
+                if not self.dotsPerMillimeterX:
+                        return point
+                d = QPointF()
+                d.setX( point.x() * self.dotsPerMillimeterX )
+                d.setY( point.y() * self.dotsPerMillimeterY )
+                return d
 
-	def mapPointToRecognizer(self, point):
-		# When there's no image loaded yet, return the same point
-		if not self.dotsPerMillimeterX:
-			return point
-		d = QPointF()
-		d.setX( point.x() / self.dotsPerMillimeterX )
-		d.setY( point.y() / self.dotsPerMillimeterY )
-		return d
+        def mapPointToRecognizer(self, point):
+                # When there's no image loaded yet, return the same point
+                if not self.dotsPerMillimeterX:
+                        return point
+                d = QPointF()
+                d.setX( point.x() / self.dotsPerMillimeterX )
+                d.setY( point.y() / self.dotsPerMillimeterY )
+                return d
 
-	def setTemplate(self, template):
-		self.clearTemplate()
-		self._template = template
-		self.connect( template, SIGNAL('boxAdded(PyQt_PyObject)'), self.templateBoxAdded )
-		self.connect( template, SIGNAL('boxRemoved(PyQt_PyObject)'), self.templateBoxRemoved )
-		for box in self._template.boxes:
-			self.addTemplateBox( box )
+        def setTemplate(self, template):
+                self.clearTemplate()
+                self._template = template
+                self.connect( template, SIGNAL('boxAdded(PyQt_PyObject)'), self.templateBoxAdded )
+                self.connect( template, SIGNAL('boxRemoved(PyQt_PyObject)'), self.templateBoxRemoved )
+                for box in self._template.boxes:
+                        self.addTemplateBox( box )
 
-	def templateBoxAdded(self, box):
-		self.addTemplateBox( box )
+        def templateBoxAdded(self, box):
+                self.addTemplateBox( box )
 
-	def templateBoxRemoved(self, box):
-		for x in self._templateBoxes:
-			if x.templateBox == box:
-				self.removeTemplateBox( x )
-				break
+        def templateBoxRemoved(self, box):
+                for x in self._templateBoxes:
+                        if x.templateBox == box:
+                                self.removeTemplateBox( x )
+                                break
 
-	def isEnabled(self):
-		if self._template and self.recognizer:
-			return True
-		else:
-			return False
+        def isEnabled(self):
+                if self._template and self.recognizer:
+                        return True
+                else:
+                        return False
 
-	def clear(self):
-		if self._imageBoxes:
-			self.destroyItemGroup( self._imageBoxes )
-		for x in self.items():
-			self.removeItem( x )
+        def clear(self):
+                if self._imageBoxes:
+                        self.destroyItemGroup( self._imageBoxes )
+                for x in self.items():
+                        self.removeItem( x )
 
-	def clearTemplate(self):
-		for x in self._templateBoxes:
-			self.removeItem( x )
-		self._templateBoxes = []
+        def clearTemplate(self):
+                for x in self._templateBoxes:
+                        self.removeItem( x )
+                self._templateBoxes = []
 
-	def clearImage(self):
-		if self._imageBoxes:
-			# When an Item Group is removed all children
-			# are reparented. So remove all children after
-			# destroying the group.
-			boxes = []
-			for x in self._imageBoxes.children():
-				boxes.append( x )
-			self.destroyItemGroup( self._imageBoxes )
-			for x in boxes:
-				self.removeItem( x )
-		if self._image:
-			self.removeItem( self._image )
-		if self._oneBitImage:
-			self.removeItem( self._oneBitImage )
+        def clearImage(self):
+                if self._imageBoxes:
+                        # When an Item Group is removed all children
+                        # are reparented. So remove all children after
+                        # destroying the group.
+                        boxes = []
+                        for x in self._imageBoxes.children():
+                                boxes.append( x )
+                        self.destroyItemGroup( self._imageBoxes )
+                        for x in boxes:
+                                self.removeItem( x )
+                if self._image:
+                        self.removeItem( self._image )
+                if self._oneBitImage:
+                        self.removeItem( self._oneBitImage )
 
-	def setImageBoxesVisible(self, value):
-		self._imageBoxesVisible = value
-		if self._imageBoxes:
-			self._imageBoxes.setVisible( value )
-		
-	def setTemplateBoxesVisible(self, value):
-		self._templateBoxesVisible = value
-		for item in self.items():
-			if item and unicode(item.data( 0 ).toString()) == 'TemplateBox':
-				item.setVisible( value )
+        def setImageBoxesVisible(self, value):
+                self._imageBoxesVisible = value
+                if self._imageBoxes:
+                        self._imageBoxes.setVisible( value )
 
-	def setFeatureBoxesVisible(self, value):
-		self._featureBoxesVisible = value
-		for item in self.items():
-			if item and unicode(item.data( 0 ).toString()) == 'TemplateBox':
-				item.feature.setVisible( value )
+        def setTemplateBoxesVisible(self, value):
+                self._templateBoxesVisible = value
+                for item in self.items():
+                        if item and unicode(item.data( 0 ).toString()) == 'TemplateBox':
+                                item.setVisible( value )
 
-	def setBinarizedVisible(self, value):
-		self._binarizedVisible = value
-		self._oneBitImage.setVisible( value )
+        def setFeatureBoxesVisible(self, value):
+                self._featureBoxesVisible = value
+                for item in self.items():
+                        if item and unicode(item.data( 0 ).toString()) == 'TemplateBox':
+                                item.feature.setVisible( value )
 
-	def setMode(self, mode):
-		self._mode = mode
+        def setBinarizedVisible(self, value):
+                self._binarizedVisible = value
+                self._oneBitImage.setVisible( value )
 
-	def setActiveItem(self, item):
-		previousBox = None
-		if self._activeItem:
-			self._activeItem.setPen( self._selectionPen )
-			self._activeItem.setBrush( self._selectionBrush )
-			previousBox = self._activeItem.templateBox
-		currentBox = None
-		self._activeItem = item
-		if item:
-			self._activeItem.setPen( self._activeItemPen )
-			self._activeItem.setBrush( self._activeItemBrush )
-			currentBox = self._activeItem.templateBox
-		self.emit( SIGNAL('currentTemplateBoxChanged(PyQt_PyObject,PyQt_PyObject)'), currentBox, previousBox )
+        def setMode(self, mode):
+                self._mode = mode
 
-	def activeItem(self):
-		return self._activeItem
-		
-	def createTemplateBox(self, rect):
-		item = TemplateBoxItem( rect )
-		item.setPen( self._selectionPen )
-		item.setBrush( self._selectionBrush )
-		item.setZValue( 5 )
-		item.setData( 0, QVariant( 'TemplateBox' ) )
-		self._templateBoxes.append( item )
-		self.addItem( item )
-		return item
+        def setActiveItem(self, item):
+                previousBox = None
+                if self._activeItem:
+                        self._activeItem.setPen( self._selectionPen )
+                        self._activeItem.setBrush( self._selectionBrush )
+                        previousBox = self._activeItem.templateBox
+                currentBox = None
+                self._activeItem = item
+                if item:
+                        self._activeItem.setPen( self._activeItemPen )
+                        self._activeItem.setBrush( self._activeItemBrush )
+                        currentBox = self._activeItem.templateBox
+                self.emit( SIGNAL('currentTemplateBoxChanged(PyQt_PyObject,PyQt_PyObject)'), currentBox, previousBox )
 
-	def addTemplateBox(self, box):
-		item = TemplateBoxItem( self.mapRectFromRecognizer( box.rect ), self.mapRectFromRecognizer( box.featureRect ) )
-		item.setPen( self._selectionPen )
-		item.setBrush( self._selectionBrush )
-		item.setZValue( 5 )
-		item.setData( 0, QVariant( 'TemplateBox' ) )
-		item.templateBox = box
-		item.setVisible( self._templateBoxesVisible )
-		self._templateBoxes.append( item )
-		self.addItem( item )
-		self.setActiveItem( item )
-		return item
+        def activeItem(self):
+                return self._activeItem
 
-	def removeTemplateBox(self, item):
-		if self._activeItem == item:
-			self.setActiveItem( None )	
-		self._templateBoxes.remove( item )	
-		self.removeItem( item )
+        def createTemplateBox(self, rect):
+                item = TemplateBoxItem( rect )
+                item.setPen( self._selectionPen )
+                item.setBrush( self._selectionBrush )
+                item.setZValue( 5 )
+                item.setData( 0, QVariant( 'TemplateBox' ) )
+                self._templateBoxes.append( item )
+                self.addItem( item )
+                return item
 
-	def mousePressEvent(self, event):
-		if not self.isEnabled():
-			return
-		if self._mode == self.CreationMode:
-			# Search if there's a TemplateBox where the user clicked
-			# If so, make the item active.
-			for item in self.items( event.scenePos() ):
-				if unicode(item.data(0).toString()) == 'TemplateBox':
-					self.setActiveItem( item )
-					return
+        def addTemplateBox(self, box):
+                item = TemplateBoxItem( self.mapRectFromRecognizer( box.rect ), self.mapRectFromRecognizer( box.featureRect ) )
+                item.setPen( self._selectionPen )
+                item.setBrush( self._selectionBrush )
+                item.setZValue( 5 )
+                item.setData( 0, QVariant( 'TemplateBox' ) )
+                item.templateBox = box
+                item.setVisible( self._templateBoxesVisible )
+                self._templateBoxes.append( item )
+                self.addItem( item )
+                self.setActiveItem( item )
+                return item
 
-			# Otherwise, create a new template box
-			rect = QRectF(event.scenePos().x(), event.scenePos().y(), 1, 1)
-			self._selection = self.createTemplateBox( rect )
-		elif self._mode == self.SelectionMode:
-			item = self.itemAt( event.scenePos() )
-			if item != self._activeItem:
-				self._activeItem.setBrush( QBrush() )
-				self._activeItem.setPen( QPen() )
-				self._activeItem = item
-				self._activeItem.setBrush( self._activeItemBrush )
-				self._activeItem.setBrush( self._activeItemBrush )
+        def removeTemplateBox(self, item):
+                if self._activeItem == item:
+                        self.setActiveItem( None )
+                self._templateBoxes.remove( item )
+                self.removeItem( item )
 
-	def mouseReleaseEvent(self, event):
-		if not self.isEnabled():
-			return
-		if self._mode == self.CreationMode and self._selection:
-			# Remove the selection. Currently main window will handle
-			# the signaland add the box in the template. 
-			rect = self._selection.rect()
-			self.removeItem( self._selection )
-			self._selection = None
-			self.emit( SIGNAL('newTemplateBox(QRectF)'), self.mapRectToRecognizer( rect ) )
+        def mousePressEvent(self, event):
+                if not self.isEnabled():
+                        return
+                if self._mode == self.CreationMode:
+                        # Search if there's a TemplateBox where the user clicked
+                        # If so, make the item active.
+                        for item in self.items( event.scenePos() ):
+                                if unicode(item.data(0).toString()) == 'TemplateBox':
+                                        self.setActiveItem( item )
+                                        return
 
-	def mouseMoveEvent(self, event):
-		self.emit( SIGNAL('mouseMoved'), event.scenePos() )
-		if not self.isEnabled():
-			return
-		if self._mode == self.CreationMode and self._selection:
-			rect = self._selection.rect()
-			rect.setBottomRight( event.scenePos() )
-			self._selection.setRect( rect )
-		
+                        # Otherwise, create a new template box
+                        rect = QRectF(event.scenePos().x(), event.scenePos().y(), 1, 1)
+                        self._selection = self.createTemplateBox( rect )
+                elif self._mode == self.SelectionMode:
+                        item = self.itemAt( event.scenePos() )
+                        if item != self._activeItem:
+                                self._activeItem.setBrush( QBrush() )
+                                self._activeItem.setPen( QPen() )
+                                self._activeItem = item
+                                self._activeItem.setBrush( self._activeItemBrush )
+                                self._activeItem.setBrush( self._activeItemBrush )
+
+        def mouseReleaseEvent(self, event):
+                if not self.isEnabled():
+                        return
+                if self._mode == self.CreationMode and self._selection:
+                        # Remove the selection. Currently main window will handle
+                        # the signaland add the box in the template.
+                        rect = self._selection.rect()
+                        self.removeItem( self._selection )
+                        self._selection = None
+                        self.emit( SIGNAL('newTemplateBox(QRectF)'), self.mapRectToRecognizer( rect ) )
+
+        def mouseMoveEvent(self, event):
+                self.emit( SIGNAL('mouseMoved'), event.scenePos() )
+                if not self.isEnabled():
+                        return
+                if self._mode == self.CreationMode and self._selection:
+                        rect = self._selection.rect()
+                        rect.setBottomRight( event.scenePos() )
+                        self._selection.setRect( rect )
+
 
 class MainWindow(QMainWindow):
-	Unnamed = _('unnamed')
+        Unnamed = _('unnamed')
 
-	def __init__(self, parent=None):
-		QMainWindow.__init__(self, parent)
-		loadUi( 'mainwindow.ui', self )
-		self.scene = DocumentScene()
-		self.uiView.setScene( self.scene )
-		self.uiView.setRenderHints( QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform )
-		self.uiView.setCacheMode( QGraphicsView.CacheBackground )
+        def __init__(self, parent=None):
+                QMainWindow.__init__(self, parent)
+                loadUi( 'mainwindow.ui', self )
+                self.scene = DocumentScene()
+                self.uiView.setScene( self.scene )
+                self.uiView.setRenderHints( QPainter.Antialiasing | QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform )
+                self.uiView.setCacheMode( QGraphicsView.CacheBackground )
 
-		self._template = Template( self.Unnamed )
-		self.scene.setTemplate(self._template)
+                self._template = Template( self.Unnamed )
+                self.scene.setTemplate(self._template)
 
-		self.uiTool = ToolWidget( self.uiToolDock )
+                self.uiTool = ToolWidget( self.uiToolDock )
 
-		self.undoGroup = QUndoGroup( self )
-		stack = QUndoStack( self.undoGroup )
-		self.undoGroup.setActiveStack( stack )
+                self.undoGroup = QUndoGroup( self )
+                stack = QUndoStack( self.undoGroup )
+                self.undoGroup.setActiveStack( stack )
 
-		# Let default Qt Undo and Redo Actions handle the Undo/Redo actions
-		# And put them at the very beggining of the Edit menu
-		undoAction = self.undoGroup.createUndoAction( self.menuEdit )
-		undoAction.setShortcut( "Ctrl+Z" )
-		redoAction = self.undoGroup.createRedoAction( self.menuEdit )
-		redoAction.setShortcut( "Ctrl+Shift+Z" )
-		if self.menuEdit.actions():
-			firstAction = self.menuEdit.actions()[0]
-		else:
-			firstAction = None
-		self.menuEdit.insertAction( firstAction, undoAction )
-		self.menuEdit.insertAction( firstAction, redoAction )
+                # Let default Qt Undo and Redo Actions handle the Undo/Redo actions
+                # And put them at the very beggining of the Edit menu
+                undoAction = self.undoGroup.createUndoAction( self.menuEdit )
+                undoAction.setShortcut( "Ctrl+Z" )
+                redoAction = self.undoGroup.createRedoAction( self.menuEdit )
+                redoAction.setShortcut( "Ctrl+Shift+Z" )
+                if self.menuEdit.actions():
+                        firstAction = self.menuEdit.actions()[0]
+                else:
+                        firstAction = None
+                self.menuEdit.insertAction( firstAction, undoAction )
+                self.menuEdit.insertAction( firstAction, redoAction )
 
-		self.connect( self.scene, SIGNAL('newTemplateBox(QRectF)'), self.newTemplateBox )
-		self.connect( self.scene, SIGNAL('currentTemplateBoxChanged(PyQt_PyObject,PyQt_PyObject)'), self.currentTemplateBoxChanged)
-		self.connect( self.scene, SIGNAL('mouseMoved'), self.sceneMouseMoved )
-		self.connect( self.actionExit, SIGNAL('triggered()'), self.close )
-		self.connect( self.actionOpenImage, SIGNAL('triggered()'), self.openImage )
-		self.connect( self.actionOpenTemplate, SIGNAL('triggered()'), self.openTemplate )
-		self.connect( self.actionToggleImageBoxes, SIGNAL('triggered()'), self.toggleImageBoxes )
-		self.connect( self.actionToggleTemplateBoxes, SIGNAL('triggered()'), self.toggleTemplateBoxes )
-		self.connect( self.actionToggleFeatureBoxes, SIGNAL('triggered()'), self.toggleFeatureBoxes )
-		self.connect( self.actionToggleBinarized, SIGNAL('triggered()'), self.toggleBinarized )
-		self.connect( self.actionLogin, SIGNAL('triggered()'), self.login )
-		self.connect( self.actionSaveTemplate, SIGNAL('triggered()'), self.saveTemplate )
-		self.connect( self.actionSaveTemplateAs, SIGNAL('triggered()'), self.saveTemplateAs )
-		self.connect( self.actionNewTemplate, SIGNAL('triggered()'), self.newTemplate )
-		self.connect( self.actionDelete, SIGNAL('triggered()'), self.removeTemplateBox )
-		self.connect( self.actionZoom, SIGNAL('triggered()'), self.zoom )
-		self.connect( self.actionUnzoom, SIGNAL('triggered()'), self.unzoom )
-		self.connect( self.actionFindMatchingTemplateByOffset, SIGNAL('triggered()'), self.findMatchingTemplateByOffset )
-		self.connect( self.actionFindMatchingTemplateByText, SIGNAL('triggered()'), self.findMatchingTemplateByText )
-		self.connect( self.actionRecognizeInvoice, SIGNAL('triggered()'), self.recognizeInvoice )
-		self.toggleImageBoxes()
-		QTimer.singleShot( 1000, self.setup )
-		self.updateTitle()
-		self.updateActions()
+                self.connect( self.scene, SIGNAL('newTemplateBox(QRectF)'), self.newTemplateBox )
+                self.connect( self.scene, SIGNAL('currentTemplateBoxChanged(PyQt_PyObject,PyQt_PyObject)'), self.currentTemplateBoxChanged)
+                self.connect( self.scene, SIGNAL('mouseMoved'), self.sceneMouseMoved )
+                self.connect( self.actionExit, SIGNAL('triggered()'), self.close )
+                self.connect( self.actionOpenImage, SIGNAL('triggered()'), self.openImage )
+                self.connect( self.actionOpenTemplate, SIGNAL('triggered()'), self.openTemplate )
+                self.connect( self.actionToggleImageBoxes, SIGNAL('triggered()'), self.toggleImageBoxes )
+                self.connect( self.actionToggleTemplateBoxes, SIGNAL('triggered()'), self.toggleTemplateBoxes )
+                self.connect( self.actionToggleFeatureBoxes, SIGNAL('triggered()'), self.toggleFeatureBoxes )
+                self.connect( self.actionToggleBinarized, SIGNAL('triggered()'), self.toggleBinarized )
+                self.connect( self.actionLogin, SIGNAL('triggered()'), self.login )
+                self.connect( self.actionSaveTemplate, SIGNAL('triggered()'), self.saveTemplate )
+                self.connect( self.actionSaveTemplateAs, SIGNAL('triggered()'), self.saveTemplateAs )
+                self.connect( self.actionNewTemplate, SIGNAL('triggered()'), self.newTemplate )
+                self.connect( self.actionDelete, SIGNAL('triggered()'), self.removeTemplateBox )
+                self.connect( self.actionZoom, SIGNAL('triggered()'), self.zoom )
+                self.connect( self.actionUnzoom, SIGNAL('triggered()'), self.unzoom )
+                self.connect( self.actionFindMatchingTemplateByOffset, SIGNAL('triggered()'), self.findMatchingTemplateByOffset )
+                self.connect( self.actionFindMatchingTemplateByText, SIGNAL('triggered()'), self.findMatchingTemplateByText )
+                self.connect( self.actionRecognizeInvoice, SIGNAL('triggered()'), self.recognizeInvoice )
+                self.toggleImageBoxes()
+                QTimer.singleShot( 1000, self.setup )
+                self.updateTitle()
+                self.updateActions()
 
-		# Login defaults
-		LoginDialog.defaultHost = 'localhost'
-		LoginDialog.defaultPort = 8070
-		LoginDialog.defaultProtocol = 'socket://'
-		LoginDialog.defaultUserName = 'admin'
+                # Login defaults
+                LoginDialog.defaultHost = 'localhost'
+                LoginDialog.defaultPort = 8070
+                LoginDialog.defaultProtocol = 'socket://'
+                LoginDialog.defaultUserName = 'admin'
 
-		self.recognizer = Recognizer()
-		self.connect( self.recognizer, SIGNAL('finished()'), self.recognized )
+                self.recognizer = Recognizer()
+                self.connect( self.recognizer, SIGNAL('finished()'), self.recognized )
 
-	def setup(self):
-		#initOcrSystem()	
-		#self.scene.setDocument( 'c-0.tif' )
+        def setup(self):
+                #initOcrSystem()
+                #self.scene.setDocument( 'c-0.tif' )
 
-		self.connect( self.uiTool, SIGNAL('recognizerChanged(QString)'), self.recognizerChanged )
-		self.uiTool.show()
-		self.uiToolDock.setWidget( self.uiTool )
+                self.connect( self.uiTool, SIGNAL('recognizerChanged(QString)'), self.recognizerChanged )
+                self.uiTool.show()
+                self.uiToolDock.setWidget( self.uiTool )
 
-		#Rpc.session.login( 'http://admin:admin@127.0.0.1:8069', 'g1' )
-	def sceneMouseMoved(self, pos):
-		self.updatePosition( pos )
+                #Rpc.session.login( 'http://admin:admin@127.0.0.1:8069', 'g1' )
+        def sceneMouseMoved(self, pos):
+                self.updatePosition( pos )
 
-	def findMatchingTemplateByOffset(self):
-		self.findMatchingTemplate( 'offset' )
+        def findMatchingTemplateByOffset(self):
+                self.findMatchingTemplate( 'offset' )
 
-	def findMatchingTemplateByText(self):
-		self.findMatchingTemplate( 'text' )
+        def findMatchingTemplateByText(self):
+                self.findMatchingTemplate( 'text' )
 
-	def recognizeInvoice(self):
-		from NanScan.Generics.InvoiceRecognizer import InvoiceRecognizer
-		p = InvoiceRecognizer()
-		result = p.recognize( self.recognizer )
-		QMessageBox.information( self, _('Invoice Recognition'), result )
+        def recognizeInvoice(self):
+                from NanScan.Generics.InvoiceRecognizer import InvoiceRecognizer
+                p = InvoiceRecognizer()
+                result = p.recognize( self.recognizer )
+                QMessageBox.information( self, _('Invoice Recognition'), result )
 
-	def findMatchingTemplate(self, type):
-		if type == 'offset':
-			title = _('Template search by offset')
-		else:
-			title = _('Template search by text')
+        def findMatchingTemplate(self, type):
+                if type == 'offset':
+                        title = _('Template search by offset')
+                else:
+                        title = _('Template search by text')
 
-		if not self.recognizer.image:
-			QMessageBox.information( self, title, _('No image opened. Please open an image to find a matching template.') )
-			return
+                if not self.recognizer.image:
+                        QMessageBox.information( self, title, _('No image opened. Please open an image to find a matching template.') )
+                        return
 
-		if not Rpc.session.logged():
-			if not self.login():
-				return 
-		templates = TemplateStorageManager.loadAll()
-		time = QTime()
-		time.start()
-		if type == 'offset':
-			result = self.recognizer.findMatchingTemplateByOffset( templates )
-		else:
-			result = self.recognizer.findMatchingTemplateByText( templates )
-		elapsed = time.elapsed()
-		if not result['template']:
-			QMessageBox.information( self, title, _('No template found for the current image. Took %d milliseconds') % elapsed )
-			return
-		self._template = result['template'] 
-		self.scene.setTemplate(self._template)
-		self.updateTitle()
-		QMessageBox.information( self, title, _('Template found with offset (%.2f, %.2f) in %d milliseconds') % (result['xOffset'], result['yOffset'], elapsed) )
-		
+                if not Rpc.session.logged():
+                        if not self.login():
+                                return
+                templates = TemplateStorageManager.loadAll()
+                time = QTime()
+                time.start()
+                if type == 'offset':
+                        result = self.recognizer.findMatchingTemplateByOffset( templates )
+                else:
+                        result = self.recognizer.findMatchingTemplateByText( templates )
+                elapsed = time.elapsed()
+                if not result['template']:
+                        QMessageBox.information( self, title, _('No template found for the current image. Took %d milliseconds') % elapsed )
+                        return
+                self._template = result['template']
+                self.scene.setTemplate(self._template)
+                self.updateTitle()
+                QMessageBox.information( self, title, _('Template found with offset (%.2f, %.2f) in %d milliseconds') % (result['xOffset'], result['yOffset'], elapsed) )
 
-	def recognizerChanged(self, recognizer):
-		rect = self.uiTool.box.rect 
-		self.uiTool.setText( self.scene.recognizer.textInRegion( rect, unicode(recognizer) ) )
 
-	def newTemplateBox(self, rect):
-		# Creating and adding the box to the template
-		# will automatically create the Rect in the Scene
-		box = TemplateBox()
-		box.rect = rect
-		box.text = self.scene.recognizer.textInRegion( rect, 'text' )
-		box.featureRect = self.scene.recognizer.featureRectInRegion( rect, 'text' )
-		add = AddTemplateBoxUndoCommand( self._template, box )
-		self.undoGroup.activeStack().push( add )
-		
-	#def setCurrentTemplateBox(self, box):
-		#if self.uiTool.box:
-			#self.uiTool.store()
-		#self.uiTool.box = box
-	def currentTemplateBoxChanged(self, current, previous):
-		if self.uiTool.box:
-			self.uiTool.store()
-		self.uiTool.box = current
-		self.actionDelete.setEnabled( bool(current) )
+        def recognizerChanged(self, recognizer):
+                rect = self.uiTool.box.rect
+                self.uiTool.setText( self.scene.recognizer.textInRegion( rect, unicode(recognizer) ) )
 
-	def openImage(self):
-		self.fileName = QFileDialog.getOpenFileName( self )	
-		if self.fileName.isNull():
-			return
+        def newTemplateBox(self, rect):
+                # Creating and adding the box to the template
+                # will automatically create the Rect in the Scene
+                box = TemplateBox()
+                box.rect = rect
+                box.text = self.scene.recognizer.textInRegion( rect, 'text' )
+                box.featureRect = self.scene.recognizer.featureRectInRegion( rect, 'text' )
+                add = AddTemplateBoxUndoCommand( self._template, box )
+                self.undoGroup.activeStack().push( add )
 
-		QApplication.setOverrideCursor( Qt.BusyCursor )
-		self.recognizer.startRecognition( QImage(self.fileName) )
+        #def setCurrentTemplateBox(self, box):
+                #if self.uiTool.box:
+                        #self.uiTool.store()
+                #self.uiTool.box = box
+        def currentTemplateBoxChanged(self, current, previous):
+                if self.uiTool.box:
+                        self.uiTool.store()
+                self.uiTool.box = current
+                self.actionDelete.setEnabled( bool(current) )
 
-	def recognized(self):
-		self.scene.setDocument( self.recognizer )
-		QApplication.restoreOverrideCursor()
+        def openImage(self):
+                self.fileName = QFileDialog.getOpenFileName( self )
+                if self.fileName.isNull():
+                        return
 
-	def toggleImageBoxes(self):
-		self.scene.setImageBoxesVisible( self.actionToggleImageBoxes.isChecked() )	
+                QApplication.setOverrideCursor( Qt.BusyCursor )
+                self.recognizer.startRecognition( QImage(self.fileName) )
 
-	def toggleTemplateBoxes(self):
-		self.scene.setTemplateBoxesVisible( self.actionToggleTemplateBoxes.isChecked() )
+        def recognized(self):
+                self.scene.setDocument( self.recognizer )
+                QApplication.restoreOverrideCursor()
 
-	def toggleFeatureBoxes(self):
-		self.scene.setFeatureBoxesVisible( self.actionToggleFeatureBoxes.isChecked() )
+        def toggleImageBoxes(self):
+                self.scene.setImageBoxesVisible( self.actionToggleImageBoxes.isChecked() )
 
-	def toggleBinarized(self):
-		self.scene.setBinarizedVisible( self.actionToggleBinarized.isChecked() )
+        def toggleTemplateBoxes(self):
+                self.scene.setTemplateBoxesVisible( self.actionToggleTemplateBoxes.isChecked() )
 
-	def removeTemplateBox(self):
-		if not self.uiTool.box:
-			return
-		delete = DeleteUndoCommand( self._template, self.uiTool.box )
-		self.undoGroup.activeStack().push( delete )
+        def toggleFeatureBoxes(self):
+                self.scene.setFeatureBoxesVisible( self.actionToggleFeatureBoxes.isChecked() )
 
-	def zoom(self):
-		self.uiView.scale( 1.2, 1.2 )
+        def toggleBinarized(self):
+                self.scene.setBinarizedVisible( self.actionToggleBinarized.isChecked() )
 
-	def unzoom(self):
-		self.uiView.scale( 0.8, 0.8 )
+        def removeTemplateBox(self):
+                if not self.uiTool.box:
+                        return
+                delete = DeleteUndoCommand( self._template, self.uiTool.box )
+                self.undoGroup.activeStack().push( delete )
 
-	def login(self):
-		dialog = LoginDialog( self )
-		if dialog.exec_() == QDialog.Rejected:
-			return False
-		if Rpc.session.login( dialog.url, dialog.databaseName ) > 0:
-			self.updateTitle()
-			return True
-		else:
-			self.updateTitle()
-			return False
+        def zoom(self):
+                self.uiView.scale( 1.2, 1.2 )
 
-	def newTemplate(self):
-		answer = QMessageBox.question(self, _('New Template'), _('Do you want to save changes to the current template?'), QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel )
-		if answer == QMessageBox.Cancel:
-			return
-		elif answer == QMessageBox.Save:
-			if not self.saveTemplate():
-				return
-		self._template = Template( self.Unnamed )	
-		self.scene.setTemplate( self._template )
-		self.updateTitle()
+        def unzoom(self):
+                self.uiView.scale( 0.8, 0.8 )
 
-	def saveTemplate(self):
-		self.uiTool.store()
-		if not Rpc.session.logged():
-			if not self.login():
-				return False
+        def login(self):
+                dialog = LoginDialog( self )
+                if dialog.exec_() == QDialog.Rejected:
+                        return False
+                if Rpc.session.login( dialog.url, dialog.databaseName ) > 0:
+                        self.updateTitle()
+                        return True
+                else:
+                        self.updateTitle()
+                        return False
 
-		if not self._template.id:
-			(name, ok) = QInputDialog.getText( self, _('Save template'), _('Template name:') )
-			if not ok:
-				return False
-			self._template.name = unicode(name)
-				
+        def newTemplate(self):
+                answer = QMessageBox.question(self, _('New Template'), _('Do you want to save changes to the current template?'), QMessageBox.Save | QMessageBox.No | QMessageBox.Cancel )
+                if answer == QMessageBox.Cancel:
+                        return
+                elif answer == QMessageBox.Save:
+                        if not self.saveTemplate():
+                                return
+                self._template = Template( self.Unnamed )
+                self.scene.setTemplate( self._template )
+                self.updateTitle()
 
-		if self._template.id:
-			Rpc.session.call( '/object', 'execute', 'nan.template', 'write', [self._template.id], {'name': self._template.name } )
-			ids = Rpc.session.call( '/object', 'execute', 'nan.template.box', 'search', [('template','=',self._template.id)] )
-			Rpc.session.call( '/object', 'execute', 'nan.template.box', 'unlink', ids )
-		else:
-			self._template.id = Rpc.session.call( '/object', 'execute', 'nan.template', 'create', {'name': self._template.name } )
-		for x in self._template.boxes:
-			values = { 
-				'x': x.rect.x(), 
-				'y': x.rect.y(), 
-				'width': x.rect.width(), 
-				'height': x.rect.height(), 
-				'feature_x' : x.featureRect.x(),
-				'feature_y' : x.featureRect.y(),
-				'feature_width' : x.featureRect.width(),
-				'feature_height' : x.featureRect.height(),
-				'template': self._template.id, 
-				'name': x.name, 
-				'text': x.text, 
-				'recognizer': x.recognizer, 
-				'type': x.type, 
-				'filter': x.filter 
-			}
-			Rpc.session.call( '/object', 'execute', 'nan.template.box', 'create', values )
-		self.updateTitle()
-		return True
+        def saveTemplate(self):
+                self.uiTool.store()
+                if not Rpc.session.logged():
+                        if not self.login():
+                                return False
 
-	def saveTemplateAs(self):
-		id = self._template.id
-		self._template.id = 0
-		if not self.saveTemplate():
-			self._template.id = id
-		self.updateTitle()
+                if not self._template.id:
+                        (name, ok) = QInputDialog.getText( self, _('Save template'), _('Template name:') )
+                        if not ok:
+                                return False
+                        self._template.name = unicode(name)
 
-	def openTemplate(self):
-		if not Rpc.session.logged():
-			if not self.login():
-				return
 
-		dialog = OpenTemplateDialog(self)
-		if dialog.exec_() == QDialog.Rejected:
-			return
-		model = dialog.group[dialog.id]
-		self._template = Template( model.value('name') )
-		self._template.id = model.id
+                if self._template.id:
+                        Rpc.session.call( '/object', 'execute', 'nan.template', 'write', [self._template.id], {'name': self._template.name } )
+                        ids = Rpc.session.call( '/object', 'execute', 'nan.template.box', 'search', [('template','=',self._template.id)] )
+                        Rpc.session.call( '/object', 'execute', 'nan.template.box', 'unlink', ids )
+                else:
+                        self._template.id = Rpc.session.call( '/object', 'execute', 'nan.template', 'create', {'name': self._template.name } )
+                for x in self._template.boxes:
+                        values = {
+                                'x': x.rect.x(),
+                                'y': x.rect.y(),
+                                'width': x.rect.width(),
+                                'height': x.rect.height(),
+                                'feature_x' : x.featureRect.x(),
+                                'feature_y' : x.featureRect.y(),
+                                'feature_width' : x.featureRect.width(),
+                                'feature_height' : x.featureRect.height(),
+                                'template': self._template.id,
+                                'name': x.name,
+                                'text': x.text,
+                                'recognizer': x.recognizer,
+                                'type': x.type,
+                                'filter': x.filter
+                        }
+                        Rpc.session.call( '/object', 'execute', 'nan.template.box', 'create', values )
+                self.updateTitle()
+                return True
 
-		fields = Rpc.session.execute('/object', 'execute', 'nan.template.box', 'fields_get')
-		model.value('boxes').addFields( fields )
-		for x in model.value('boxes'):
-			box = TemplateBox()
-			box.rect = QRectF( x.value('x'), x.value('y'), x.value('width'), x.value('height') )
-			box.featureRect = QRectF( x.value('feature_x'), x.value('feature_y'), 
-						  x.value('feature_width'), x.value('feature_height') )
-			box.name = x.value('name')
-			box.text = x.value('text')
-			box.recognizer = x.value('recognizer')
-			box.type = x.value('type')
-			box.filter = x.value('filter')
-			self._template.addBox( box )
+        def saveTemplateAs(self):
+                id = self._template.id
+                self._template.id = 0
+                if not self.saveTemplate():
+                        self._template.id = id
+                self.updateTitle()
 
-		self.scene.setTemplate(self._template)
-		self.updateTitle()
+        def openTemplate(self):
+                if not Rpc.session.logged():
+                        if not self.login():
+                                return
 
-	def updateTitle(self):
-		self.setWindowTitle( "Planta - [%s]" % self._template.name )
-		
-		if Rpc.session.logged():
-			server = '%s [%s]' % (Rpc.session.url, Rpc.session.databaseName)
-		else:
-			shortcut = unicode( self.actionLogin.shortcut().toString() )
-			if shortcut:
-				server = _('Press %s to login') % shortcut
-			else:
-				server = 'not logged in'
-		self.uiServer.setText( server )
+                dialog = OpenTemplateDialog(self)
+                if dialog.exec_() == QDialog.Rejected:
+                        return
+                model = dialog.group[dialog.id]
+                self._template = Template( model.value('name') )
+                self._template.id = model.id
 
-	def updatePosition(self, pos):
-		pos = self.uiView.mapToScene( self.uiView.mapFromGlobal( QCursor.pos() ) )
-		pos = self.scene.mapPointToRecognizer( pos )
-		position = _('(%.2f, %.2f)') % (pos.x(), pos.y())
- 		self.uiPosition.setText( position )
+                fields = Rpc.session.execute('/object', 'execute', 'nan.template.box', 'fields_get')
+                model.value('boxes').addFields( fields )
+                for x in model.value('boxes'):
+                        box = TemplateBox()
+                        box.rect = QRectF( x.value('x'), x.value('y'), x.value('width'), x.value('height') )
+                        box.featureRect = QRectF( x.value('feature_x'), x.value('feature_y'),
+                                                  x.value('feature_width'), x.value('feature_height') )
+                        box.name = x.value('name')
+                        box.text = x.value('text')
+                        box.recognizer = x.value('recognizer')
+                        box.type = x.value('type')
+                        box.filter = x.value('filter')
+                        self._template.addBox( box )
 
-	def updateActions(self):
-		# Allow deleting if there's a TemplateBox selected
-		self.actionDelete.setEnabled( bool(self.uiTool.box) )
+                self.scene.setTemplate(self._template)
+                self.updateTitle()
+
+        def updateTitle(self):
+                self.setWindowTitle( "Planta - [%s]" % self._template.name )
+
+                if Rpc.session.logged():
+                        server = '%s [%s]' % (Rpc.session.url, Rpc.session.databaseName)
+                else:
+                        shortcut = unicode( self.actionLogin.shortcut().toString() )
+                        if shortcut:
+                                server = _('Press %s to login') % shortcut
+                        else:
+                                server = 'not logged in'
+                self.uiServer.setText( server )
+
+        def updatePosition(self, pos):
+                pos = self.uiView.mapToScene( self.uiView.mapFromGlobal( QCursor.pos() ) )
+                pos = self.scene.mapPointToRecognizer( pos )
+                position = _('(%.2f, %.2f)') % (pos.x(), pos.y())
+                self.uiPosition.setText( position )
+
+        def updateActions(self):
+                # Allow deleting if there's a TemplateBox selected
+                self.actionDelete.setEnabled( bool(self.uiTool.box) )

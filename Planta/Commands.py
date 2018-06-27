@@ -25,36 +25,36 @@
 #
 ##############################################################################
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PySide.QtCore import *
+from PySide.QtGui import *
 
 class DeleteUndoCommand(QUndoCommand):
-	def __init__( self, template, box ):
-		self.template = template
-		self.box = box
-		if box.name:
-			text = _("Delete box '%s'") % box.name
-		else:
-			text = _("Delete unnamed box")
-		QUndoCommand.__init__( self, text )	
+        def __init__( self, template, box ):
+                self.template = template
+                self.box = box
+                if box.name:
+                        text = _("Delete box '%s'") % box.name
+                else:
+                        text = _("Delete unnamed box")
+                QUndoCommand.__init__( self, text )
 
-	def redo(self):
-		self.template.removeBox( self.box )
+        def redo(self):
+                self.template.removeBox( self.box )
 
-	def undo(self):
-		self.template.addBox( self.box )
+        def undo(self):
+                self.template.addBox( self.box )
 
 
 class AddTemplateBoxUndoCommand(QUndoCommand):
-	def __init__( self, template, box ):
-		self.template = template
-		self.box = box
-		QUndoCommand.__init__( self, _("Add box") )
+        def __init__( self, template, box ):
+                self.template = template
+                self.box = box
+                QUndoCommand.__init__( self, _("Add box") )
 
-	def redo(self):
-		self.template.addBox( self.box )
+        def redo(self):
+                self.template.addBox( self.box )
 
-	def undo(self):
-		self.template.removeBox( self.box )
+        def undo(self):
+                self.template.removeBox( self.box )
 
 
