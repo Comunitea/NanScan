@@ -5,14 +5,9 @@
 #   taken from gnomolicious http://www.nongnu.org/gnomolicious/
 #   adapted by Nicolas Évrard <nicoe@altern.org>
 
-import imp
 import sys
 import os
-import glob
 
-from stat import ST_MODE
-
-from distutils.file_util import copy_file
 from distutils.sysconfig import get_python_lib
 from distutils.core import setup
 
@@ -73,8 +68,6 @@ if len(sys.argv) < 2:
         sys.exit(2)
 
 command = sys.argv[1]
-
-check_modules()
 
 # create startup script
 if os.name != 'nt':
