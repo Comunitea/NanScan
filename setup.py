@@ -42,25 +42,6 @@ version = Version.Version
 # get python short version
 py_short_version = '%s.%s' % sys.version_info[:2]
 
-required_modules = [
-        ('PySide.QtCore', 'Qt4 Core python bindings'),
-        ('PySide.QtGui', 'Qt4 Gui python bindings'),
-        ('PySide.uic', 'Qt4 uic python bindings'),
-]
-
-def check_modules():
-        ok = True
-        for modname, desc in required_modules:
-                try:
-                        exec('import %s' % modname)
-                except ImportError:
-                        ok = False
-                        print 'Error: python module %s (%s) is required' % (modname, desc)
-
-        if not ok:
-                sys.exit(1)
-
-
 long_desc = '''\
 =====================================
 Koo Client and Development Platform
