@@ -101,11 +101,11 @@ if os.name != 'nt':
 		get_python_lib(), sys.executable
 	)
 	# write script
-	f = open('planta', 'w')
+	f = open('planta.sh', 'w')
 	f.write(start_script)
 	f.close()
 	
-	script_files = ['planta']
+	script_files = ['planta.sh']
 else:
 	script_files = []
 
