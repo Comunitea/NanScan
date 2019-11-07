@@ -25,37 +25,37 @@
 #
 ##############################################################################
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.uic import *
+from PySide.QtCore import *
+from PySide.QtGui import *
+from PySide.uic import *
 from Koo import Rpc
 from Koo.Model.Group import RecordGroup
 from Koo.Model.KooModel import KooModel
 
 class OpenTemplateDialog(QDialog):
-	def __init__(self, parent=None):
-		QDialog.__init__(self, parent)
-		loadUi( 'opentemplate.ui', self )
+        def __init__(self, parent=None):
+                QDialog.__init__(self, parent)
+                loadUi( 'opentemplate.ui', self )
 
-		visible = ['name', 'boxes']
-		print Rpc.session.url
-		print 'open: ', Rpc.session
-		self.fields = Rpc.session.execute('/object', 'execute', 'nan.template', 'fields_get', visible)
-		ids = Rpc.session.execute('/object', 'execute', 'nan.template', 'search', [])
-		self.group = RecordGroup( 'nan.template', self.fields, ids )
-		self.treeModel = KooModel( self )
-		self.treeModel.setRecordGroup( self.group )
-		self.treeModel.setFields( self.fields )
-		self.treeModel.setShowBackgroundColor( False )
-		self.treeModel.setMode( KooModel.ListMode )
-		self.treeModel.setFieldsOrder( ['name', 'boxes'] )
+                visible = ['name', 'boxes']
+                print Rpc.session.url
+                print 'open: ', Rpc.session
+                self.fields = Rpc.session.execute('/object', 'execute', 'nan.template', 'fields_get', visible)
+                ids = Rpc.session.execute('/object', 'execute', 'nan.template', 'search', [])
+                self.group = RecordGroup( 'nan.template', self.fields, ids )
+                self.treeModel = KooModel( self )
+                self.treeModel.setRecordGroup( self.group )
+                self.treeModel.setFields( self.fields )
+                self.treeModel.setShowBackgroundColor( False )
+                self.treeModel.setMode( KooModel.ListMode )
+                self.treeModel.setFieldsOrder( ['name', 'boxes'] )
 
-		self.treeView.setModel( self.treeModel )
+                self.treeView.setModel( self.treeModel )
 
-		self.connect( self.pushOpen, SIGNAL('clicked()'), self.open )
+                self.connect( self.pushOpen, SIGNAL('clicked()'), self.open )
 
-	def open(self):
-		index = self.treeView.selectionModel().currentIndex()
-		self.id = self.treeModel.id(index)
-		self.accept()
+        def open(self):
+                index = self.treeView.selectionModel().currentIndex()
+                self.id = self.treeModel.id(index)
+                self.accept()
 
