@@ -71,17 +71,16 @@ command = sys.argv[1]
 
 # create startup script
 if os.name != 'nt':
-        start_script = "cd %s/Planta\nexec %s ./planta.py $@\n" % (
-                get_python_lib(), sys.executable
-        )
-        # write script
-        f = open('planta', 'w')
-        f.write(start_script)
-        f.close()
+	start_script = "cd %s/Planta\nexec %s ./planta.py $@\n" % (get_python_lib(), sys.executable)
+	# write script
+	f = open('planta.sh', 'w')
+	f.write(start_script)
+	f.close()
+	
+	script_files = ['planta.sh']
 
-        script_files = ['planta']
 else:
-        script_files = []
+	script_files = []
 
 packages = [
         'NanScan',
